@@ -1,29 +1,58 @@
 bl_info = {
-    "name": "Enhanced Object Organizer with Visual Color",
+    "name": "Enhanced Object Organizer with Visual Color and Save Option",
     "blender": (3, 0, 0),
     "category": "Object",
-    "version": (1, 0, 1),
-    "description": "Rename an object, move it to a new collection with a visible color, and ask to save the project.",
+    "version": (1, 0, 2),
+    "description": "Rename an object, move it to a collection, modify the collection's color, and optionally save the project.",
 }
 
 import bpy
-import random
+
+# Mapping color names to Blender's color tag system
+COLOR_TAG_MAPPING = {
+    'NONE': 'NONE',
+    'RED': 'COLOR_01',
+    'ORANGE': 'COLOR_02',
+    'YELLOW': 'COLOR_03',
+    'GREEN': 'COLOR_04',
+    'BLUE': 'COLOR_05',
+    'PURPLE': 'COLOR_06',
+    'PINK': 'COLOR_07',
+    'BROWN': 'COLOR_08',
+    'GREY': 'COLOR_08',  # Grey shares the same tag as Brown
+    'WHITE': 'COLOR_08', # White also shares the same tag
+}
 
 class OBJECT_OT_EnhancedOrganizer(bpy.types.Operator):
-    """Rename object, move to collection, and save project"""
+    """Rename object, move to collection, modify collection color, and optionally save project"""
     bl_idname = "object.enhanced_organizer"
-    bl_label = "Enhanced Organizer with Visual Color"
+    bl_label = "Enhanced Organizer with Save Option"
     bl_options = {'REGISTER', 'UNDO'}
 
     object_name: bpy.props.StringProperty(name="New Object Name")
     collection_name: bpy.props.StringProperty(name="New Collection Name")
-    collection_color: bpy.props.FloatVectorProperty(
+    collection_color: bpy.props.EnumProperty(
         name="Collection Color",
-        description="Color displayed for the collection",
-        subtype='COLOR',
-        size=4,
-        default=(0.5, 0.5, 0.5, 1.0),
-        min=0.0, max=1.0
+        description="Choose the collection color",
+        items=[
+            ('NONE', "None", "No color tag"),
+            ('RED', "Red", "Color red"),
+            ('ORANGE', "Orange", "Color orange"),
+            ('YELLOW', "Yellow", "Color yellow"),
+            ('GREEN', "Green", "Color green"),
+            ('BLUE', "Blue", "Color blue"),
+            ('PURPLE', "Purple", "Color purple"),
+            ('PINK', "Pink", "Color pink"),
+            ('BROWN', "Brown", "Color brown"),
+            ('GREY', "Grey", "Color grey"),
+            ('WHITE', "White", "Color white"),
+        ],
+        default='NONE'
+    )
+    save_project: bpy.props.BoolProperty(
+        name="Save Project",
+        description="Save the Blender project after organizing",
+        default=False
     )
 
     def invoke(self, context, event):
@@ -35,43 +64,34 @@ class OBJECT_OT_EnhancedOrganizer(bpy.types.Operator):
             self.report({'ERROR'}, "No active object selected!")
             return {'CANCELLED'}
 
+        # Ensure valid collection name
+        if not self.collection_name.strip():
+            self.report({'ERROR'}, "Collection name cannot be empty!")
+            return {'CANCELLED'}
+
+        # Check if the collection exists, if not create it
+        new_collection = bpy.data.collections.get(self.collection_name)
+        if not new_collection:
+            new_collection = bpy.data.collections.new(self.collection_name)
+            context.scene.collection.children.link(new_collection)
+
         # Rename the object
         obj.name = self.object_name
-
-        # Create or get the new collection
-        if self.collection_name not in bpy.data.collections:
-            new_collection = bpy.data.collections.new(name=self.collection_name)
-            context.scene.collection.children.link(new_collection)
-        else:
-            new_collection = bpy.data.collections[self.collection_name]
 
         # Move the object to the new collection
         for col in obj.users_collection:
             col.objects.unlink(obj)
         new_collection.objects.link(obj)
 
-        # Create a dummy object to display the color
-        bpy.ops.mesh.primitive_uv_sphere_add(radius=0.5, location=(0, 0, 0))
-        color_sphere = context.active_object
-        color_sphere.name = f"{self.collection_name}_Color"
-        new_collection.objects.link(color_sphere)
+        # Set the collection's color using the correct color tag
+        collection_color_tag = COLOR_TAG_MAPPING.get(self.collection_color, 'NONE')
+        new_collection.color_tag = collection_color_tag
 
-        # Unlink dummy object from the scene's main collection
-        context.scene.collection.objects.unlink(color_sphere)
+        # Save the project if the option is selected
+        if self.save_project:
+            bpy.ops.wm.save_mainfile('INVOKE_DEFAULT')
 
-        # Assign a material with the chosen color
-        mat = bpy.data.materials.new(name=f"{self.collection_name}_Material")
-        mat.use_nodes = True
-        nodes = mat.node_tree.nodes
-        principled = nodes.get("Principled BSDF")
-        if principled:
-            principled.inputs["Base Color"].default_value = self.collection_color
-        color_sphere.data.materials.append(mat)
-
-        # Prompt to save the file
-        bpy.ops.wm.save_mainfile('INVOKE_DEFAULT')
-
-        self.report({'INFO'}, "Object renamed, moved to collection, and color displayed.")
+        self.report({'INFO'}, f"Object renamed, moved to collection '{self.collection_name}', and color updated.")
         return {'FINISHED'}
 
 # Add to the M key map
