@@ -1,13 +1,13 @@
-# Enhanced Object Organizer with Visual Color
+# Enhanced Object Organizer with Visual Color with Save Project.
 
-This Blender add-on allows you to rename objects, move them to new collections with visible color indicators, and optionally save the Blender project.
+This Blender add-on allows you to rename objects, move them to new or existing collections, and apply a visible color indicator to represent the collection. You can also optionally save the Blender project after organizing the objects.
 
 ## Features
 
 - Rename the selected object.
-- Create or move objects to a new collection with a visual color indicator.
-- Assign a unique material to represent the collection color.
-- Optional project save functionality after organizing.
+- Move the object to a new or existing collection, ensuring the object's name matches the collection name.
+- Assign a visual color indicator to the collection using a material (no additional mesh is created).
+- Optionally save the Blender project after organizing.
 
 ## Installation
 
@@ -16,12 +16,18 @@ This Blender add-on allows you to rename objects, move them to new collections w
 3. Click `Install`, select the `.py` file, and enable the add-on.
 4. Press `M` in Object Mode to use the add-on.
 
+## Requirements
+
+- Blender 3.0.0 or higher
+- Python 3.7 or higher
+- Operating System: Windows, macOS, or Linux
+
 ## How to Use
 
 1. Select an object in Object Mode.
-2. Press `M` to invoke the organizer dialog.
-3. Enter a new object name, collection name, color, and choose whether to save the project.
-4. Click OK to apply the changes.
+2. Press `M` to invoke the "Enhanced Organizer" dialog.
+3. Enter a new object name, collection name, select a color for the collection, and choose whether to save the project.
+4. Click OK to apply the changes. The object will be renamed and moved to the specified collection, and the collection will be visually updated with the selected color.
 
 ## Shortcuts
 
