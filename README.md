@@ -5,7 +5,7 @@ This Blender add-on allows you to rename objects, move them to new or existing c
 ## Features
 
 - Rename the selected object.
-- Move the object to a new or existing collection, ensuring the object's name matches the collection name.
+- Move the object to a new or existing collection. If you want to keep it in the same collection, use the same name.
 - Assign a visual color indicator to the collection using a material (no additional mesh is created).
 - Optionally save the Blender project after organizing.
 
