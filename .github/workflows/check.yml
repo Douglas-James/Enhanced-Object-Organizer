@@ -1,0 +1,41 @@
+name: Check for Required Files
+
+on:
+  push:
+    branches:
+      - main # Run on push to the main branch
+  pull_request:
+    branches:
+      - main # Run on pull request to the main branch
+
+jobs:
+  check_files:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Check if README.md exists
+        run: |
+          if [ ! -f README.md ]; then
+            echo "Error: README.md is missing!" && exit 1
+          else
+            echo "README.md found!"
+          fi
+
+      - name: Check if LICENSE exists
+        run: |
+          if [ ! -f LICENSE ]; then
+            echo "Error: LICENSE file is missing!" && exit 1
+          else
+            echo "LICENSE file found!"
+          fi
+
+      - name: Check if .gitignore exists
+        run: |
+          if [ ! -f .gitignore ]; then
+            echo "Error: .gitignore file is missing!" && exit 1
+          else
+            echo ".gitignore file found!"
+          fi
